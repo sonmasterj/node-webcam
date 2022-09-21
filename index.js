@@ -76,11 +76,11 @@ const startRecording = (url,pathCam,index) => {
         "-r",
         "6",
         "-crf",
-        "20",
+        "24",
         "-f",
         "segment",
         "-segment_time",
-        "100",
+        "200",
         "-segment_format_options",
         "movflags=frag_keyframe+empty_moov+default_base_moof",
         "-segment_list_type",
@@ -123,7 +123,7 @@ Webcam.list( function( list ) {
         console.log('list camera:',list)
 
         for(let i=0;i<list.length;i++){
-            if(i%2==1){
+            if(i%2==0){
                 continue
             }
             let index= Math.floor(i/2)
