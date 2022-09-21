@@ -89,7 +89,9 @@ const startRecording = (url,pathCam,index) => {
         `list${index}.csv`,
         "-strftime",
         "1",
-        `${path.join(pathCam, "video-%Y-%m-%dT%H-%M.mp4")}`
+        `${path.join(pathCam, "video-%Y-%m-%dT%H-%M.mp4")}`,
+        "-loglevel",
+        "error"
     ];
 
     console.log("args", args);
