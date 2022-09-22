@@ -59,6 +59,7 @@ const opts = {
 
 
 //Creates webcam instance
+let listCam=[]
 
 
 const startRecording = (url,pathCam,index) => {
@@ -98,7 +99,7 @@ const startRecording = (url,pathCam,index) => {
 
     const ffmpegProcess = childProcess.spawn("ffmpeg", args, {
         detached: false,
-        stdio: "inherit"
+        stdio: "pipe"
     });
 
     ffmpegProcess.on("exit", (code, signal) => {
@@ -116,6 +117,17 @@ const startRecording = (url,pathCam,index) => {
     ffmpegProcess.on("error", error => {
         console.log("ffmpeg error", error);
     });
+    ffmpegProcess.stderr.on('data',(dt)=>{
+        let err = Buffer.from(dt).toString()
+        console.log('ffmpeg error:',err)
+        if(err.indexOf('No such device')!==-1){
+            Webcam.list( function( list ){
+                console.log('new list camera:',list)
+                listCam=[...list]
+
+            })
+        }
+    })
 };
 const Webcam = NodeWebcam.create( opts );
 Webcam.list( function( list ) {
@@ -123,9 +135,10 @@ Webcam.list( function( list ) {
     //Use another device
     try{
         console.log('list camera:',list)
-
+        listCam=[...list]
+        let tmp = list.length%2===0?1:0
         for(let i=0;i<list.length;i++){
-            if(i%2==0){
+            if(i%2==tmp){
                 continue
             }
             let index= Math.floor(i/2)
@@ -143,4 +156,37 @@ Webcam.list( function( list ) {
     
 
 });
+
+setInterval(()=>{
+    Webcam.list( function( list ){
+        let newList=[]
+        for(let cam of list){
+            let index = listCam.findIndex(el=>el===cam)
+            if(index===-1){
+                newList.push(cam)
+            }
+        }
+        try{
+            console.log('new camera added:',newList)
+            listCam=[...list]
+            let tmp = newList.length%2===0?1:0
+            for(let i=0;i<newList.length;i++){
+                if(i%2==tmp){
+                    continue
+                }
+                let index= Math.floor(i/2)+Math.floor((listCam.length-newList.length)/2)
+                console.log('begin cam insert '+index)
+                let pathCam= path.join(__dirname,'cam'+index)
+                if(!fs.existsSync(pathCam)){
+                    fs.mkdirSync(pathCam)
+                }
+                startRecording(newList[i],pathCam,index)
+            }
+        }
+        catch(err){
+            console.log('error creat camera thread:',err)
+        }
+
+    })
+},5000)
 // startRecording('/dev/video2','cam1')
