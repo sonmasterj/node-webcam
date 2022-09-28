@@ -18,10 +18,10 @@ try{
         count=0
         try{
             let gpsInfo={
-                time:new Date(gps.state.time).toLocaleString(),
-                lat:gps.state.lat,
-                lon:gps.state.lon,
-                speed:gps.state.speed
+                time:new Date(gps.state.time).toLocaleString('vi-VN'),
+                lat:Math.round(gps.state.lat*10000000)/10000000,
+                lon:Math.round(gps.state.lon*10000000)/10000000,
+                speed:Math.round((gps.state.speed*0.514*3.6*0.8)*10)/10
             }
             console.log('gps info:', gpsInfo);
             let time = gpsInfo.time.toLocaleString()
@@ -38,7 +38,7 @@ try{
         // 
         if(data && data.includes("$GPRMC")){
             gps.update(data);
-            console.log('data raw from gps:',data)
+            // console.log('data raw from gps:',data)
         }
         
     })
