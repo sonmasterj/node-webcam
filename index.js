@@ -115,11 +115,11 @@ const startRecording = (url,pathCam,index) => {
     });
 
     ffmpegProcess.on("error", error => {
-        console.log("ffmpeg error", error);
+        console.log("ffmpeg error process", error);
     });
     ffmpegProcess.stderr.on('data',(dt)=>{
         let err = Buffer.from(dt).toString()
-        console.log('ffmpeg error:',err)
+        console.log('ffmpeg error stderr:',err)
         if(err.indexOf('No such device')!==-1){
             Webcam.list( function( list ){
                 console.log('new list camera:',list)
@@ -143,7 +143,7 @@ Webcam.list( function( list ) {
             }
             let index= Math.floor(i/2)
             console.log('begin cam '+index)
-            let pathCam= path.join(__dirname,'cam'+index)
+            let pathCam= path.join('/media/sonmaster/4065-2C59','cam'+index)
             if(!fs.existsSync(pathCam)){
                 fs.mkdirSync(pathCam)
             }
@@ -176,7 +176,7 @@ setInterval(()=>{
                 }
                 let index= Math.floor(i/2)+Math.floor((listCam.length-newList.length)/2)
                 console.log('begin cam insert '+index)
-                let pathCam= path.join(__dirname,'cam'+index)
+                let pathCam= path.join('/media/sonmaster/4065-2C59','cam'+index)
                 if(!fs.existsSync(pathCam)){
                     fs.mkdirSync(pathCam)
                 }
