@@ -103,7 +103,7 @@ const startRecording = (url,pathCam,index) => {
         "fast",
         
         "-r",
-        "6",
+        "5",
         "-crf",
         "24",
         "-f",
