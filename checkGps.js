@@ -1,13 +1,13 @@
 const fs=require('fs')
-const { SerialPort } = require('serialport')
-const { ReadlineParser } = require('@serialport/parser-readline')
+const  SerialPort = require('serialport')
+const  ReadlineParser  = require('@serialport/parser-readline')
 const GPS = require('gps');
 // const fs = require("fs")
 const GPS_PORT='/dev/ttyACM0'
 const GPS_FILE='gpsInfo.txt'
 const MAIN_PATH='/mnt/usb'
 const MAX_COUNT=250
-const ser = new SerialPort({path:GPS_PORT,baudRate:9600});
+let ser = new SerialPort(GPS_PORT,{baudRate:9600});
 let port=ser.pipe(new ReadlineParser({delimiter:'\r\n'}))
 const gps = new GPS;
 let count=0
@@ -52,8 +52,46 @@ try{
         ser.flush()
         
     })
+    ser.on('close',()=>{
+        console.log(new Date().toLocaleString()+ ' gps port close!')
+        // serial_connect=false
+        setInterval(()=>{
+            console.log('serial open:',ser.isOpen)
+            
+            if(!ser.isOpen){
+                console.log(new Date().toLocaleString()+ ' reconnect gps port !')
+                let ser = new SerialPort(GPS_PORT,{baudRate:9600});
+                port=ser.pipe(new ReadlineParser({delimiter:'\r\n'}))
+                port.on('data', data => {
+                    // 
+                    try{
+                        if(data && data.includes("$GPRMC")){
+                            console.log('update raw from gps:'+data)
+                            gps.update(data);
+                            
+                            
+                        }
+                        ser.flush()
+                    }
+                    catch(err){
+                        console.log(new Date().toLocaleString()+':update gps data error:',err)
+                    }
+                    
+                    
+                })
+                // ser.on('open',()=>{
+                //     console.log('open serial success!')
+                //     serial_connect=true
+                // })
+                // ser.on('close',()=>{
+                //     serial_connect=false
+                // })
+            }
+        },6000)
+    })
 
 }
 catch(er){
+ 
     console.log('gps service error:',)
 }

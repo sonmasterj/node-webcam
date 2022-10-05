@@ -147,7 +147,7 @@ const startRecording = (url,pathCam,index) => {
     });
     ffmpegProcess.stderr.on('data',(dt)=>{
         let err = Buffer.from(dt).toString()
-        console.log('ffmpeg error stderr '+url+':',err)
+        console.log(new Date().toLocaleString()+' ffmpeg error stderr '+url+':',err)
         if(err.indexOf('No such device')!==-1 || err.indexOf('No space left on device')!==-1){
             Webcam.list( function( list ){
                 console.log('new list camera:',list)
@@ -156,7 +156,7 @@ const startRecording = (url,pathCam,index) => {
             })
         }
         else if(err.indexOf("Input/output error")!==-1){
-            console.log("not found usb storage")
+            console.log(new Date().toLocaleString() +" not found usb storage")
             pathDisk=''
             listCam=[]
         }

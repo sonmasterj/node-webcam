@@ -17,7 +17,7 @@
     "gps": "^0.6.1",
     "node-webcam": "^0.8.1",
     "read-last-lines": "^1.8.0",
-    "serialport": "^10.4.0",
+    "serialport": "^9.2.8",
     "vtt-creator": "^1.1.1"
   }
 }
