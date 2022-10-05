@@ -101,7 +101,8 @@ try{
         // 
         if(data && data.includes("$GPRMC")){
             gps.update(data);
-            // console.log('data raw from gps:',data)
+            console.log('update raw from gps')
+            ser.flush()
         }
         
     })
