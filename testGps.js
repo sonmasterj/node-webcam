@@ -12,7 +12,7 @@ const watcher_0=chokidar.watch('list0.csv',{persistent:true})
 const watcher_1=chokidar.watch('list1.csv',{persistent:true})
 const watcher_2=chokidar.watch('list2.csv',{persistent:true})
 const watcher_3=chokidar.watch('list3.csv',{persistent:true})
-const GPS_PORT='/dev/ttyACM0'
+const GPS_PORT='/dev/ttyACM1'
 const GPS_FILE='gpsInfo.txt'
 const MAIN_PATH='/mnt/usb'
 const MAX_COUNT=250
@@ -35,14 +35,14 @@ try{
         count=0
         try{
             let gpsInfo={
-                time:new Date(gps.state.time).toLocaleString('vi-VN'),
-                lat:Math.round(gps.state.lat*10000000)/10000000,
-                lon:Math.round(gps.state.lon*10000000)/10000000,
+                time:new Date(gps.state.time).toLocaleString('vi-VN').replace(',',''),
+                lat:Math.round(gps.state.lat*1000000)/1000000,
+                lon:Math.round(gps.state.lon*1000000)/1000000,
                 speed:Math.round((gps.state.speed*0.514*3.6*0.8)*10)/10
             }
             // console.log('gps info:', gpsInfo);
             let time = gpsInfo.time.toLocaleString()
-            let data = `${time};${gpsInfo.lat};${gpsInfo.lon};${gpsInfo.speed}\n`
+            let data = `${time} ${gpsInfo.lat} ${gpsInfo.lon} ${gpsInfo.speed}km/h\n`
             if(subEnable[0]){
                 v0.add(cntArr[0],cntArr[0]+5,data)
                 cntArr[0]=cntArr[0]+5
@@ -92,7 +92,7 @@ try{
             // fs.appendFileSync(GPS_FILE,data)
         }
         catch(err){
-            console.log('error update gps file:',err)
+            console.log('error update gps file:'+new Date().toLocaleString(),err)
         }
         
     })
@@ -100,8 +100,9 @@ try{
     port.on('data', data => {
         // 
         if(data && data.includes("$GPRMC")){
-            gps.update(data);
             console.log('update raw from gps')
+            gps.update(data);
+            
             
         }
         ser.flush()
