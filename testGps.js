@@ -119,7 +119,7 @@ try{
                 cntArr[0]=0
                 subEnable[0]=true
             }
-            else if(line.length>3)
+            else if(line.length>20)
             {
                 let lengthSub = v0.toString().length;
                 console.log("length sub 0: ",lengthSub)
@@ -152,7 +152,7 @@ try{
                 cntArr[1]=0
                 subEnable[1]=true
             }
-            else if(line.length>3)
+            else if(line.length>20)
             {
                 let lengthSub = v1.toString().length;
                 console.log("length sub 1: ",lengthSub)
@@ -185,7 +185,7 @@ try{
                 cntArr[2]=0
                 subEnable[2]=true
             }
-            else if(line.length>3)
+            else if(line.length>20)
             {
                 let lengthSub = v2.toString().length;
                 console.log("length sub 2: ",lengthSub)
@@ -218,7 +218,7 @@ try{
                 cntArr[3]=0
                 subEnable[3]=true
             }
-            else if(line.length>3)
+            else if(line.length>20)
             {
                 let lengthSub = v3.toString().length;
                 console.log("length sub 3: ",lengthSub)
