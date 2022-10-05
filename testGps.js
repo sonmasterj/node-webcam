@@ -102,8 +102,9 @@ try{
         if(data && data.includes("$GPRMC")){
             gps.update(data);
             console.log('update raw from gps')
-            ser.flush()
+            
         }
+        ser.flush()
         
     })
 
