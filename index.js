@@ -5,6 +5,17 @@ const path=require('path')
 const MAIN_PATH='/mnt/usb'
 const DISK_CMD="lsblk --noheadings --raw --output rm,tran,type,path --sort path | awk '/^1 usb disk/ {d=$4} END {print d}'"
 const {exec}=require('child_process')
+exec("pm2 start testGps.js --name 'gps-service'", (error, stdout, stderr) => {
+    if (error) {
+        console.log(`error: ${error.message}`);
+        return;
+    }
+    if (stderr) {
+        console.log(`stderr: ${stderr}`);
+        return;
+    }
+    console.log('done start gps-service');
+});
 const opts = {
 
     //Picture related
