@@ -2,6 +2,9 @@ const NodeWebcam = require( "node-webcam" );
 const fs = require('fs');
 const childProcess = require("child_process");
 const path=require('path')
+const MAIN_PATH='/mnt/usb'
+const DISK_CMD="lsblk --noheadings --raw --output rm,tran,type,path --sort path | awk '/^1 usb disk/ {d=$4} END {print d}'"
+const {exec}=require('child_process')
 const opts = {
 
     //Picture related
@@ -56,11 +59,25 @@ const opts = {
     verbose: false
 
 };
-
-
+const executeCmd=(cmd)=>{
+    return new Promise((resolve,reject)=>{
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                // console.log(`error: ${error.message}`);
+                return reject(error.message)
+            }
+            if (stderr) {
+                // console.log(`stderr: ${stderr}`);
+                return reject(stderr)
+            }
+            // console.log(`stdout: ${stdout}`);
+            resolve(stdout.trim())
+        });
+    })
+}
 //Creates webcam instance
 let listCam=[]
-
+let pathDisk=''
 
 const startRecording = (url,pathCam,index) => {
     const args = [
@@ -81,7 +98,7 @@ const startRecording = (url,pathCam,index) => {
         "-f",
         "segment",
         "-segment_time",
-        "200",
+        "100",
         "-segment_format_options",
         "movflags=frag_keyframe+empty_moov+default_base_moof",
         "-segment_list_type",
@@ -103,11 +120,11 @@ const startRecording = (url,pathCam,index) => {
     });
 
     ffmpegProcess.on("exit", (code, signal) => {
-        console.log("ffmpeg exited", code, signal);
+        console.log("ffmpeg exited "+url, code, signal);
     });
 
     ffmpegProcess.on("close", (code, signal) => {
-        console.log("ffmpeg closed", code, signal);
+        console.log("ffmpeg closed "+url, code, signal);
     });
 
     ffmpegProcess.on("message", message => {
@@ -119,45 +136,83 @@ const startRecording = (url,pathCam,index) => {
     });
     ffmpegProcess.stderr.on('data',(dt)=>{
         let err = Buffer.from(dt).toString()
-        console.log('ffmpeg error stderr:',err)
-        if(err.indexOf('No such device')!==-1){
+        console.log('ffmpeg error stderr '+url+':',err)
+        if(err.indexOf('No such device')!==-1 || err.indexOf('No space left on device')!==-1){
             Webcam.list( function( list ){
                 console.log('new list camera:',list)
                 listCam=[...list]
 
             })
         }
+        else if(err.indexOf("Input/output error")!==-1){
+            console.log("not found usb storage")
+            pathDisk=''
+            listCam=[]
+        }
+
     })
 };
 const Webcam = NodeWebcam.create( opts );
-Webcam.list( function( list ) {
+// Webcam.list( function( list ) {
 
-    //Use another device
-    try{
-        console.log('list camera:',list)
-        listCam=[...list]
-        let tmp = list.length%2===0?1:0
-        for(let i=0;i<list.length;i++){
-            if(i%2==tmp){
-                continue
-            }
-            let index= Math.floor(i/2)
-            console.log('begin cam '+index)
-            let pathCam= path.join('/media/sonmaster/4065-2C59','cam'+index)
-            if(!fs.existsSync(pathCam)){
-                fs.mkdirSync(pathCam)
-            }
-            startRecording(list[i],pathCam,index)
-        }
-    }
-    catch(err){
-        console.log('error creat camera thread:',err)
-    }
+//     //Use another device
+//     try{
+//         console.log('list camera:',list)
+//         listCam=[...list]
+//         let tmp = list.length%2===0?1:0
+//         for(let i=0;i<list.length;i++){
+//             if(i%2==tmp){
+//                 continue
+//             }
+//             let index= Math.floor(i/2)
+//             console.log('begin cam '+index)
+//             let pathCam= path.join('/media/sonmaster/USB','cam'+index)
+//             if(!fs.existsSync(pathCam)){
+//                 fs.mkdirSync(pathCam)
+//             }
+//             startRecording(list[i],pathCam,index)
+//         }
+//     }
+//     catch(err){
+//         console.log('error creat camera thread:',err)
+//     }
     
 
-});
+// });
 
-setInterval(()=>{
+setInterval(async()=>{
+    let tmp=''
+    try{
+        let listDisk = await executeCmd(DISK_CMD)
+        tmp=listDisk
+        
+        if(listDisk.length<3){
+            console.log('no usb disk plug!')
+            pathDisk=''
+            return
+        }
+        if(pathDisk===''){
+            console.log('list usb disk:',listDisk)
+            console.log('begin mount usb disk!')
+            let cmd = 'mount '+listDisk+'1 ' +MAIN_PATH
+            console.log(cmd)
+            await executeCmd(cmd)
+            console.log('success mount usb disk ',listDisk)
+            pathDisk=listDisk
+        }
+
+    }
+    catch(err){
+        console.log('check storage error:',err)
+        if(err.toString().indexOf('already mounted on')!==-1){
+            pathDisk=tmp
+        }
+        else{
+            return
+        }
+        
+    }
+    
     Webcam.list( function( list ){
         let newList=[]
         for(let cam of list){
@@ -167,6 +222,9 @@ setInterval(()=>{
             }
         }
         try{
+            if(newList.length===0){
+                return
+            }
             console.log('new camera added:',newList)
             listCam=[...list]
             let tmp = newList.length%2===0?1:0
@@ -176,7 +234,7 @@ setInterval(()=>{
                 }
                 let index= Math.floor(i/2)+Math.floor((listCam.length-newList.length)/2)
                 console.log('begin cam insert '+index)
-                let pathCam= path.join('/media/sonmaster/4065-2C59','cam'+index)
+                let pathCam= path.join(MAIN_PATH,'cam'+index)
                 if(!fs.existsSync(pathCam)){
                     fs.mkdirSync(pathCam)
                 }
@@ -188,5 +246,5 @@ setInterval(()=>{
         }
 
     })
-},5000)
+},6000)
 // startRecording('/dev/video2','cam1')
