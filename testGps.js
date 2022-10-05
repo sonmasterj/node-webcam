@@ -122,7 +122,7 @@
             // 
             try{
                 if(data && data.includes("$GPRMC")){
-                    console.log('update raw from gps:'+data)
+                    console.log('update raw from gps!')
                     gps.update(data);
                     
                     
@@ -150,7 +150,7 @@
                         // 
                         try{
                             if(data && data.includes("$GPRMC")){
-                                console.log('update raw from gps:'+data)
+                                console.log('update raw from gps!')
                                 gps.update(data);
                                 
                                 
