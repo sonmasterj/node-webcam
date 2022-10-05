@@ -46,6 +46,7 @@ try{
             if(subEnable[0]){
                 v0.add(cntArr[0],cntArr[0]+5,data)
                 cntArr[0]=cntArr[0]+5
+                console.log('add sub 0:',data)
                 if(cntArr[0]>MAX_COUNT){
                     cntArr[0]=0
                     v0=new vtt()
@@ -122,7 +123,7 @@ try{
             else if(line.length>20)
             {
                 let lengthSub = v0.toString().length;
-                console.log("length sub 0: ",lengthSub)
+                console.log("length sub 0: ",lengthSub,v0.toString())
                 if(lengthSub>100)
                 {
                     let fileName=line.split(",")[0]
