@@ -95,7 +95,7 @@ const startRecording = (url,pathCam,index) => {
         "-f",
         "v4l2",
         "-video_size",
-        "640x480",
+        "640x320",
         "-i",
         url,
         

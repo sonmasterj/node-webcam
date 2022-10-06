@@ -67,7 +67,7 @@
                 if(subEnable[0]){
                     v0.add(cntArr[0],cntArr[0]+5,data)
                     cntArr[0]=cntArr[0]+5
-                    console.log('add sub 0:',data)
+                    // console.log('add sub 0:',data)
                     if(cntArr[0]>MAX_COUNT){
                         cntArr[0]=0
                         v0=new vtt()
@@ -122,7 +122,7 @@
             // 
             try{
                 if(data && data.includes("$GPRMC")){
-                    console.log('update raw from gps!')
+                    // console.log('update raw from gps!')
                     gps.update(data);
                     
                     
@@ -150,7 +150,7 @@
                         // 
                         try{
                             if(data && data.includes("$GPRMC")){
-                                console.log('update raw from gps!')
+                                // console.log('update raw from gps!')
                                 gps.update(data);
                                 
                                 
