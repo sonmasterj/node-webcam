@@ -98,12 +98,11 @@ const startRecording = (url,pathCam,index) => {
         "640x320",
         "-i",
         url,
-        
         "-preset",
-        "fast",
+        "faster",
         
         "-r",
-        "5",
+        "4",
         "-crf",
         "24",
         "-f",
