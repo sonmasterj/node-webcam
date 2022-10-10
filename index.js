@@ -100,7 +100,7 @@ const startRecording = (url,pathCam,index) => {
         url,
         "-preset",
         "superfast",
-        "threads",
+        "-threads",
         "1",
         
         "-r",
