@@ -2,10 +2,14 @@ const NodeWebcam = require( "node-webcam" );
 const fs = require('fs');
 const childProcess = require("child_process");
 const path=require('path')
+const chokidar = require('chokidar');
+const readLastLines = require('read-last-lines');
+const watcher_0=chokidar.watch('time.txt',{persistent:true})
 const MAIN_PATH='/mnt/usb'
 const DISK_CMD="lsblk --noheadings --raw --output rm,tran,type,path --sort path | awk '/^1 usb disk/ {d=$4} END {print d}'"
 const {exec}=require('child_process')
 const USE_PI=1
+
 const system_video=['/dev/video10','/dev/video11','/dev/video12','/dev/video13','/dev/video14','/dev/video15','/dev/video16','/dev/video18']
 exec("pm2 start testGps.js --name 'gps-service'", (error, stdout, stderr) => {
     if (error) {
@@ -91,7 +95,7 @@ const executeCmd=(cmd)=>{
 //Creates webcam instance
 let listCam=[]
 let pathDisk=''
-
+let sysTime=false
 const startRecording = (url,pathCam,index) => {
     const args = [
         "-f",
@@ -198,10 +202,33 @@ const Webcam = NodeWebcam.create( opts );
     
 
 // });
+watcher_0.on('change',(path)=>{
+    console.log('time change:',path)
+    readLastLines.read('time.txt',1)
+    .then(async(line)=>{
+        console.log("new line time: "+line)
+        if(line.length<5)
+        {
+            return
+        }
+        let cmd=`timedatectl set-time "${line}"`
+        await executeCmd(cmd)
+        console.log(new Date().toLocaleString()+':sync time successfully!')
+        sysTime=true
 
+        
+    })
+    .catch(err=>{
+        console.log('error path time change:',err)
+    })
+})
 setInterval(async()=>{
     let tmp=''
     try{
+        if(!sysTime){
+            console.log('waitting for syncing time from gps data!')
+            return
+        }
         let listDisk = await executeCmd(DISK_CMD)
         tmp=listDisk
         

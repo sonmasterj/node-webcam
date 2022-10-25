@@ -3,6 +3,7 @@
     const  SerialPort  = require('serialport')
     const  ReadlineParser  = require('@serialport/parser-readline')
     const GPS = require('gps');
+    fs.writeFileSync('time.txt','')
     // const fs = require("fs");
     
     // const path = require("path");
@@ -47,6 +48,7 @@
     let v1= new vtt()
     let v2= new vtt()
     let v3= new vtt()
+    let countTime=0
     try{
         gps.on('data', dt => {
             count++
@@ -62,7 +64,23 @@
                     speed:Math.round((gps.state.speed*0.514*3.6*0.8)*10)/10
                 }
                 // console.log('gps info:', gpsInfo);
-                let time = gpsInfo.time.toLocaleString()
+                let checkTime = new Date(gps.state.time)
+                if(checkTime.getFullYear()!==1970){
+                    
+                    if(countTime===0 ||countTime===720)
+                    {
+                        let timeDt = `${checkTime.getFullYear()}-${(checkTime.getMonth()+1).toString().padStart(2,'0')}-${checkTime.getDate().toString().padStart(2,'0')} ${checkTime.getHours().toString().padStart(2,'0')}:${checkTime.getMinutes().toString().padStart(2,'0')}:${checkTime.getSeconds().toString().padStart(2,'0')}`
+                        fs.writeFileSync('time.txt',timeDt)
+                    }
+                    countTime=countTime+1
+                    if(countTime>720){
+                        countTime=1
+                    }
+                    
+                    
+
+                }
+                let time = gpsInfo.time
                 let data = `${time} ${gpsInfo.lat} ${gpsInfo.lon} ${gpsInfo.speed}km/h\n`
                 if(subEnable[0]){
                     v0.add(cntArr[0],cntArr[0]+5,data)
@@ -192,7 +210,7 @@
                 else if(line.length>20)
                 {
                     let lengthSub = v0.toString().length;
-                    console.log("length sub 0: ",lengthSub,v0.toString())
+                    // console.log("length sub 0: ",lengthSub,v0.toString())
                     if(lengthSub>100)
                     {
                         let fileName=line.split(",")[0]
