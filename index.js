@@ -5,6 +5,8 @@ const path=require('path')
 const MAIN_PATH='/mnt/usb'
 const DISK_CMD="lsblk --noheadings --raw --output rm,tran,type,path --sort path | awk '/^1 usb disk/ {d=$4} END {print d}'"
 const {exec}=require('child_process')
+const USE_PI=1
+const system_video=['/dev/video10','/dev/video11','/dev/video12','/dev/video13','/dev/video14','/dev/video15','/dev/video16','/dev/video18']
 exec("pm2 start testGps.js --name 'gps-service'", (error, stdout, stderr) => {
     if (error) {
         console.log(`error: ${error.message}`);
@@ -153,6 +155,9 @@ const startRecording = (url,pathCam,index) => {
         console.log(new Date().toLocaleString()+' ffmpeg error stderr '+url+':',err)
         if(err.indexOf('No such device')!==-1 || err.indexOf('No space left on device')!==-1){
             Webcam.list( function( list ){
+                if(USE_PI){
+                    list = list.filter(el=>!system_video.includes(el))
+                }
                 console.log('new list camera:',list)
                 listCam=[...list]
 
@@ -228,6 +233,10 @@ setInterval(async()=>{
     }
     
     Webcam.list( function( list ){
+        if(USE_PI){
+            list = list.filter(el=>!system_video.includes(el))
+        }
+        
         let newList=[]
         for(let cam of list){
             let index = listCam.findIndex(el=>el===cam)
