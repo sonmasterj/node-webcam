@@ -18,6 +18,7 @@
     // const GPS_FILE='gpsInfo.txt'
     const MAIN_PATH='/mnt/usb'
     const MAX_COUNT=250
+    const MAX_COUNT_TIME=720
     let portGPS=''
     while(1)
     {
@@ -67,13 +68,13 @@
                 let checkTime = new Date(gps.state.time)
                 if(checkTime.getFullYear()!==1970){
                     
-                    if(countTime===0 ||countTime===720)
+                    if(countTime===0 ||countTime===MAX_COUNT_TIME)
                     {
                         let timeDt = `${checkTime.getFullYear()}-${(checkTime.getMonth()+1).toString().padStart(2,'0')}-${checkTime.getDate().toString().padStart(2,'0')} ${checkTime.getHours().toString().padStart(2,'0')}:${checkTime.getMinutes().toString().padStart(2,'0')}:${checkTime.getSeconds().toString().padStart(2,'0')}`
                         fs.writeFileSync('time.txt',timeDt)
                     }
                     countTime=countTime+1
-                    if(countTime>720){
+                    if(countTime>MAX_COUNT_TIME){
                         countTime=1
                     }
                     

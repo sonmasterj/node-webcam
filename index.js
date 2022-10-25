@@ -4,7 +4,7 @@ const childProcess = require("child_process");
 const path=require('path')
 const chokidar = require('chokidar');
 const readLastLines = require('read-last-lines');
-const watcher_0=chokidar.watch('time.txt',{persistent:true})
+
 const MAIN_PATH='/mnt/usb'
 const DISK_CMD="lsblk --noheadings --raw --output rm,tran,type,path --sort path | awk '/^1 usb disk/ {d=$4} END {print d}'"
 const {exec}=require('child_process')
@@ -96,6 +96,7 @@ const executeCmd=(cmd)=>{
 let listCam=[]
 let pathDisk=''
 let sysTime=false
+
 const startRecording = (url,pathCam,index) => {
     const args = [
         "-f",
@@ -202,8 +203,9 @@ const Webcam = NodeWebcam.create( opts );
     
 
 // });
+const watcher_0=chokidar.watch('time.txt',{persistent:true})
 watcher_0.on('change',(path)=>{
-    console.log('time change:',path)
+    // console.log('time change:',path)
     readLastLines.read('time.txt',1)
     .then(async(line)=>{
         console.log("new line time: "+line)
