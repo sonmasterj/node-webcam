@@ -98,7 +98,7 @@ let pathDisk=''
 let sysTime=false
 let count=0
 let MAX_COUNT=600
-let MIN_PERCENT=70
+let MIN_PERCENT=15
 const startRecording = (url,pathCam,index) => {
     const args = [
         "-f",
