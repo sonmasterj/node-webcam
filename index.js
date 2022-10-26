@@ -4,7 +4,7 @@ const childProcess = require("child_process");
 const path=require('path')
 const chokidar = require('chokidar');
 const readLastLines = require('read-last-lines');
-
+const disk = require('diskusage')
 const MAIN_PATH='/mnt/usb'
 const DISK_CMD="lsblk --noheadings --raw --output rm,tran,type,path --sort path | awk '/^1 usb disk/ {d=$4} END {print d}'"
 const {exec}=require('child_process')
@@ -96,7 +96,9 @@ const executeCmd=(cmd)=>{
 let listCam=[]
 let pathDisk=''
 let sysTime=false
-
+let count=0
+let MAX_COUNT=600
+let MIN_PERCENT=70
 const startRecording = (url,pathCam,index) => {
     const args = [
         "-f",
@@ -248,6 +250,41 @@ setInterval(async()=>{
             console.log('success mount usb disk ',listDisk)
             pathDisk=listDisk
         }
+        if(pathDisk!==''){
+            if(count===0 || count===MAX_COUNT){
+                let info = await disk.check(MAIN_PATH)
+                let freePercent = Math.round(info.free*100/info.total)
+                console.log(new Date().toLocaleString()+' free space percent:',freePercent)
+                //delete oldest file
+                if(freePercent<=MIN_PERCENT){
+                    for(let i=0;i<4;i++){
+                        let pathCam= path.join(MAIN_PATH,'cam'+i)
+                        if(!fs.existsSync(pathCam)){
+                            continue
+                        }
+                        let lastFile = await executeCmd(`ls -t ${pathCam} | tail -1`)
+                        if(lastFile===''){
+                            continue
+                        }
+                        let fileRegex = lastFile.split('T')
+                        let dayRegex= fileRegex[0]
+                        let hourRegex = fileRegex[1].split('-')[0]
+                        let deleteRegex = dayRegex+'T'+hourRegex
+                        console.log('last day video of cam '+i,deleteRegex)
+                        let cmd = 'rm -rf '+pathCam+'/'+deleteRegex.trim()+'*'
+                        console.log(new Date().toLocaleString()+' begin delete file of cam '+i,cmd)
+                        await executeCmd(cmd)
+                        console.log(new Date().toLocaleString()+' successfully delete file of cam '+i)
+                    }
+                }
+
+            }
+            count=count+1
+            if(count>MAX_COUNT){
+                count=1
+            }
+        }
+        
 
     }
     catch(err){
@@ -260,6 +297,7 @@ setInterval(async()=>{
         }
         
     }
+
     
     Webcam.list( function( list ){
         if(USE_PI){
@@ -277,7 +315,7 @@ setInterval(async()=>{
             if(newList.length===0){
                 return
             }
-            console.log('new camera added:',newList)
+            console.log(new Date().toLocaleString()+' new camera added:',newList)
             listCam=[...list]
             let tmp = newList.length%2===0?1:0
             for(let i=0;i<newList.length;i++){
@@ -285,7 +323,7 @@ setInterval(async()=>{
                     continue
                 }
                 let index= Math.floor(i/2)+Math.floor((listCam.length-newList.length)/2)
-                console.log('begin cam insert '+index)
+                console.log(new Date().toLocaleString() +' begin cam insert '+index)
                 let pathCam= path.join(MAIN_PATH,'cam'+index)
                 if(!fs.existsSync(pathCam)){
                     fs.mkdirSync(pathCam)

@@ -66,6 +66,7 @@
                 }
                 // console.log('gps info:', gpsInfo);
                 let checkTime = new Date(gps.state.time)
+                // console.log(checkTime.getFullYear())
                 if(checkTime.getFullYear()!==1970){
                     
                     if(countTime===0 ||countTime===MAX_COUNT_TIME)
